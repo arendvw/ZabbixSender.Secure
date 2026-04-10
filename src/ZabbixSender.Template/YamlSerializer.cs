@@ -118,6 +118,16 @@ public static class YamlSerializer
         sb.AppendLine("            - type: JSONPATH");
         sb.AppendLine("              parameters:");
         sb.AppendLine($"                - {item.JsonPath}");
+        foreach (var step in item.ExtraPreprocessing)
+        {
+            sb.AppendLine($"            - type: {step.Type}");
+            if (step.Parameters.Count > 0)
+            {
+                sb.AppendLine("              parameters:");
+                foreach (var param in step.Parameters)
+                    sb.AppendLine($"                - '{param}'");
+            }
+        }
         sb.AppendLine("          master_item:");
         sb.AppendLine($"            key: {item.MasterItemKey}");
         sb.AppendLine("          tags:");

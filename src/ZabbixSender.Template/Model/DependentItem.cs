@@ -11,4 +11,11 @@ public class DependentItem
     public string? Units { get; set; }
     public string? Description { get; set; }
     public required string Component { get; set; }
+    public List<PreprocessingStep> ExtraPreprocessing { get; set; } = [];
+}
+
+public class PreprocessingStep
+{
+    public required string Type { get; set; }
+    public List<string> Parameters { get; set; } = [];
 }

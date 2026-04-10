@@ -27,6 +27,10 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             var description = prop.GetCustomAttribute<ZabbixDescriptionAttribute>()?.Description;
             var valueType = MapValueType(prop.PropertyType);
 
+            var extra = new List<PreprocessingStep>();
+            if (prop.GetCustomAttribute<ChangePerSecondAttribute>() != null)
+                extra.Add(new PreprocessingStep { Type = "CHANGE_PER_SECOND" });
+
             items.Add(new DependentItem
             {
                 Uuid = UuidGenerator.Generate(templateName, key),
@@ -37,7 +41,8 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
                 ValueType = valueType,
                 Units = units,
                 Description = description,
-                Component = section
+                Component = section,
+                ExtraPreprocessing = extra
             });
         }
 
