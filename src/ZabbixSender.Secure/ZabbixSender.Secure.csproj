@@ -3,14 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>1.0.1</Version>
-    <Description>TLS-PSK and TLS-certificate support for ZabbixSender.Async using BouncyCastle.</Description>
+    <Description>TLS-PSK and TLS-certificate support for ZabbixSender.Async using BouncyCastle. Zabbix 7 compatible.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/arendvw/ZabbixSender.Secure</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/arendvw/ZabbixSender.Secure</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.0.1</Version>
+    <Authors>Arend van Waart</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/arendvw/ZabbixSender.Secure</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/arendvw/ZabbixSender.Secure</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+</Project>

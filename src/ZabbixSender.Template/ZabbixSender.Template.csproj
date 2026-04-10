@@ -4,14 +4,9 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>1.0.1</Version>
-    <Description>Generate Zabbix 7.0 YAML templates from C# types using reflection.</Description>
+    <Description>Generate Zabbix 7.0 YAML templates from C# types using reflection. Zabbix 7 Compatible</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/arendvw/ZabbixSender.Secure</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/arendvw/ZabbixSender.Secure</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
