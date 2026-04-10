@@ -59,9 +59,8 @@ public class TemplateBuilder<TPayload> where TPayload : class
             }
             else if (TypeReflector.IsLeafType(prop.PropertyType))
             {
-                // leaf property directly on payload (unusual but supported)
-                dependentItems.AddRange(reflector.ReflectItems(typeof(TPayload), section));
-                triggers.AddRange(reflector.ReflectTriggers(typeof(TPayload), section));
+                // leaf properties directly on the payload are not supported -
+                // they should be in a nested class. Skip silently.
             }
             else
             {
@@ -127,7 +126,7 @@ public class TemplateBuilder<TPayload> where TPayload : class
             {
                 var discoveryAttr = prop.GetCustomAttribute<DiscoveryAttribute>();
                 var macroName = discoveryAttr?.MacroName;
-                var collection = TypeReflector.ToCamelCase(prop.Name);
+                var collection = $"{section}.{TypeReflector.ToCamelCase(prop.Name)}";
                 discoveryRules.Add(reflector.ReflectDiscovery(valueType!, collection, macroName));
             }
             else if (TypeReflector.IsLeafType(prop.PropertyType))

@@ -111,7 +111,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
 
                 triggerPrototypes.Add(new TriggerPrototype
                 {
-                    Uuid = UuidGenerator.Generate(templateName, $"{protoKey}.trigger.change"),
+                    Uuid = UuidGenerator.Generate(templateName, $"{protoKey}.trigger.change.{changeAttr.Priority}"),
                     Expression = expression,
                     RecoveryExpression = recovery,
                     Name = $"{DisplayName}: {FormatSection(collection)} {macroRef} {prop.Name.ToLowerInvariant()} changed",
@@ -152,7 +152,15 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             return ZabbixValueType.Float;
         if (underlying == typeof(string))
             return ZabbixValueType.Char;
+        if (underlying == typeof(bool))
+            return ZabbixValueType.Char; // JSON true/false are strings, not numeric
         return ZabbixValueType.Unsigned;
+    }
+
+    public static bool IsBoolType(Type type)
+    {
+        var underlying = Nullable.GetUnderlyingType(type) ?? type;
+        return underlying == typeof(bool);
     }
 
     public List<Trigger> ReflectTriggers(Type type, string section)
@@ -197,7 +205,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
 
                 triggers.Add(new Trigger
                 {
-                    Uuid = UuidGenerator.Generate(templateName, $"{key}.trigger.change"),
+                    Uuid = UuidGenerator.Generate(templateName, $"{key}.trigger.change.{changeAttr.Priority}"),
                     Expression = expression,
                     RecoveryExpression = recovery,
                     Name = $"{DisplayName}: {FormatSection(section)} {prop.Name.ToLowerInvariant()} changed",
