@@ -3,7 +3,7 @@ using ZabbixSender.Template.Model;
 
 namespace ZabbixSender.Template;
 
-public class TemplateBuilder
+public class TemplateBuilder<TPayload> where TPayload : class
 {
     private readonly string _name;
     private readonly string _prefix;
@@ -14,7 +14,7 @@ public class TemplateBuilder
     private int _nodataSeconds = 180;
     private bool _nodataDisabled;
 
-    private static readonly string[] SuffixesToStrip = ["Metrics", "Data", "Info", "Status"];
+    private static readonly string[] SuffixesToStrip = ["Payload", "Metrics", "Data", "Info", "Status"];
 
     private static readonly string[] GraphColors =
     [
@@ -22,32 +22,46 @@ public class TemplateBuilder
         "00AAAA", "888800", "008888", "880088", "444444"
     ];
 
-    public TemplateBuilder(string name)
+    public TemplateBuilder()
     {
-        _name = name;
-        _prefix = name.ToLowerInvariant().Replace(" ", "");
-        _templateName = $"{name} by Zabbix trapper";
+        _name = DeriveName(typeof(TPayload));
+        _prefix = _name.ToLowerInvariant().Replace(" ", "");
+        _templateName = $"{_name} by Zabbix trapper";
     }
 
-    public TemplateBuilder Add<T>() where T : class
+    private static string DeriveName(Type type)
+    {
+        var name = type.Name;
+        foreach (var suffix in SuffixesToStrip)
+        {
+            if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) && name.Length > suffix.Length)
+            {
+                name = name[..^suffix.Length];
+                break;
+            }
+        }
+        return name;
+    }
+
+    public TemplateBuilder<TPayload> Add<T>() where T : class
     {
         _types.Add(typeof(T));
         return this;
     }
 
-    public TemplateBuilder AddDiscovery<T>(string collection, string? macroName = null) where T : class
+    public TemplateBuilder<TPayload> AddDiscovery<T>(string collection, string? macroName = null) where T : class
     {
         _discoveries.Add((typeof(T), collection.ToLowerInvariant(), macroName));
         return this;
     }
 
     /// <summary>
-    /// Add a discovery rule by finding the Dictionary&lt;string, TValue&gt; property on TPayload.
+    /// Add a discovery rule by finding the Dictionary&lt;string, TValue&gt; property on TParent.
     /// The property name becomes the collection name and macro.
     /// </summary>
-    public TemplateBuilder AddDiscovery<TPayload, TValue>() where TValue : class
+    public TemplateBuilder<TPayload> AddDiscovery<TParent, TValue>() where TValue : class
     {
-        var prop = typeof(TPayload)
+        var prop = typeof(TParent)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .FirstOrDefault(p =>
                 p.PropertyType.IsGenericType
@@ -56,13 +70,13 @@ public class TemplateBuilder
 
         if (prop == null)
             throw new ArgumentException(
-                $"{typeof(TPayload).Name} has no Dictionary<string, {typeof(TValue).Name}> property");
+                $"{typeof(TParent).Name} has no Dictionary<string, {typeof(TValue).Name}> property");
 
         _discoveries.Add((typeof(TValue), prop.Name.ToLowerInvariant(), null));
         return this;
     }
 
-    public TemplateBuilder NodataTrigger(int seconds = 180, bool disable = false)
+    public TemplateBuilder<TPayload> NodataTrigger(int seconds = 180, bool disable = false)
     {
         _nodataSeconds = seconds;
         _nodataDisabled = disable;

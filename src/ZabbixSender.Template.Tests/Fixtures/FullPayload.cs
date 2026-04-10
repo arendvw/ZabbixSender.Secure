@@ -2,7 +2,7 @@ using ZabbixSender.Template;
 
 namespace ZabbixSender.Template.Tests.Fixtures;
 
-public class FullPayload
+public class TestAppPayload
 {
     public AppStatus Status { get; set; } = new();
     public ConnectedClients Clients { get; set; } = new();

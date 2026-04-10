@@ -169,8 +169,7 @@ public class TypeReflectorTests
     {
         var trigger = new TriggerAttribute("Degraded", Priority.Warning) { Duration = "5m" };
         var expr = TypeReflector.BuildTriggerExpression(trigger, "T", "k", ZabbixValueType.Char);
-        expr.ShouldContain("last(/T/k)=\"Degraded\"");
-        expr.ShouldContain("count(/T/k,5m,\"Degraded\")>0");
+        expr.ShouldBe("count(/T/k,5m,\"Degraded\")>0");
     }
 
     [Test]

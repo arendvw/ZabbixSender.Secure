@@ -244,7 +244,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
         if (trigger.Value != null)
         {
             if (trigger.Duration != null && valueType == ZabbixValueType.Char)
-                return $"last({keyRef})=\"{trigger.Value}\" and count({keyRef},{trigger.Duration},\"{trigger.Value}\")>0";
+                return $"count({keyRef},{trigger.Duration},\"{trigger.Value}\")>0";
 
             var func = $"last({keyRef})";
             return valueType == ZabbixValueType.Char

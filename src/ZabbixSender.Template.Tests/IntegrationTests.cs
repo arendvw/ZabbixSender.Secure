@@ -11,7 +11,7 @@ public class IntegrationTests
     [Test]
     public void FullTemplate_GeneratesValidYaml()
     {
-        var template = new TemplateBuilder("SampleApp")
+        var template = new TemplateBuilder<SampleAppPayload>()
             .Add<MemoryMetrics>()
             .Add<UsersMetrics>()
             .AddDiscovery<HealthCheckStatus>("Health")
@@ -62,12 +62,12 @@ public class IntegrationTests
     [Test]
     public void FullTemplate_IsDeterministic()
     {
-        var yaml1 = new TemplateBuilder("SampleApp")
+        var yaml1 = new TemplateBuilder<SampleAppPayload>()
             .Add<MemoryMetrics>().Add<UsersMetrics>()
             .AddDiscovery<HealthCheckStatus>("Health")
             .Build().ToYaml();
 
-        var yaml2 = new TemplateBuilder("SampleApp")
+        var yaml2 = new TemplateBuilder<SampleAppPayload>()
             .Add<MemoryMetrics>().Add<UsersMetrics>()
             .AddDiscovery<HealthCheckStatus>("Health")
             .Build().ToYaml();
@@ -78,7 +78,7 @@ public class IntegrationTests
     [Test]
     public void FullPayload_GeneratesImportableTemplate()
     {
-        var template = new TemplateBuilder("TestApp")
+        var template = new TemplateBuilder<TestAppPayload>()
             .Add<AppStatus>()
             .Add<ConnectedClients>()
             .Add<MemoryMetrics>()
