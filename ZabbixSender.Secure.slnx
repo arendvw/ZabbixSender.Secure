@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/ZabbixSender.Secure/ZabbixSender.Secure.csproj" />
+  <Project Path="src/ZabbixSender.Template/ZabbixSender.Template.csproj" />
+  <Project Path="src/ZabbixSender.Secure.Tests/ZabbixSender.Secure.Tests.csproj" />
+  <Project Path="src/ZabbixSender.Template.Tests/ZabbixSender.Template.Tests.csproj" />
+</Solution>
