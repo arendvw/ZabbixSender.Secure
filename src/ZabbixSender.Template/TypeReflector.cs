@@ -86,7 +86,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             {
                 var expression = BuildTriggerExpression(triggerAttr, templateName, protoKey, valueTypeMapped);
                 var recovery = BuildRecoveryExpression(triggerAttr, templateName, protoKey, valueTypeMapped);
-                var triggerLabel = triggerAttr.Value ?? $"{triggerAttr.Operator}{triggerAttr.Threshold}";
+                var triggerLabel = $"{triggerAttr.Value ?? $"{triggerAttr.Operator}{triggerAttr.Threshold}"}.{triggerAttr.Priority}";
 
                 triggerPrototypes.Add(new TriggerPrototype
                 {
@@ -174,7 +174,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             {
                 var expression = BuildTriggerExpression(triggerAttr, templateName, key, valueType);
                 var recovery = BuildRecoveryExpression(triggerAttr, templateName, key, valueType);
-                var triggerLabel = triggerAttr.Value ?? $"{triggerAttr.Operator}{triggerAttr.Threshold}";
+                var triggerLabel = $"{triggerAttr.Value ?? $"{triggerAttr.Operator}{triggerAttr.Threshold}"}.{triggerAttr.Priority}";
 
                 triggers.Add(new Trigger
                 {
@@ -240,12 +240,13 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
         var keyRef = $"/{templateName}/{itemKey}";
 
         // exact string match: last(/template/key)="value"
+        // with duration for strings: count()=0 means it was never NOT the value in that period
         if (trigger.Value != null)
         {
-            var func = trigger.Duration != null
-                ? $"min({keyRef},{trigger.Duration})"
-                : $"last({keyRef})";
+            if (trigger.Duration != null && valueType == ZabbixValueType.Char)
+                return $"last({keyRef})=\"{trigger.Value}\" and count({keyRef},{trigger.Duration},\"{trigger.Value}\")>0";
 
+            var func = $"last({keyRef})";
             return valueType == ZabbixValueType.Char
                 ? $"{func}=\"{trigger.Value}\""
                 : $"{func}={trigger.Value}";
