@@ -10,6 +10,7 @@ public class TemplateBuilder
     private readonly string _templateName;
     private readonly List<Type> _types = [];
     private readonly List<(Type ValueType, string Collection, string? MacroName)> _discoveries = [];
+    private readonly Dictionary<string, Type> _sectionTypes = new();
     private int _nodataSeconds = 180;
     private bool _nodataDisabled;
 
@@ -40,6 +41,27 @@ public class TemplateBuilder
         return this;
     }
 
+    /// <summary>
+    /// Add a discovery rule by finding the Dictionary&lt;string, TValue&gt; property on TPayload.
+    /// The property name becomes the collection name and macro.
+    /// </summary>
+    public TemplateBuilder AddDiscovery<TPayload, TValue>() where TValue : class
+    {
+        var prop = typeof(TPayload)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .FirstOrDefault(p =>
+                p.PropertyType.IsGenericType
+                && p.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>)
+                && p.PropertyType.GetGenericArguments()[1] == typeof(TValue));
+
+        if (prop == null)
+            throw new ArgumentException(
+                $"{typeof(TPayload).Name} has no Dictionary<string, {typeof(TValue).Name}> property");
+
+        _discoveries.Add((typeof(TValue), prop.Name.ToLowerInvariant(), null));
+        return this;
+    }
+
     public TemplateBuilder NodataTrigger(int seconds = 180, bool disable = false)
     {
         _nodataSeconds = seconds;
@@ -54,6 +76,8 @@ public class TemplateBuilder
         var allDependentItems = new List<DependentItem>();
         var allDiscoveryRules = new List<DiscoveryRule>();
 
+        var triggers = new List<Trigger>();
+
         // Process registered types
         foreach (var type in _types)
         {
@@ -62,7 +86,7 @@ public class TemplateBuilder
             var typeReflector = prefixAttr != null
                 ? new TypeReflector(prefixAttr.Prefix, _templateName, _name)
                 : reflector;
-            ProcessType(typeReflector, type, section, allDependentItems, allDiscoveryRules);
+            ProcessType(typeReflector, type, section, allDependentItems, allDiscoveryRules, triggers);
         }
 
         // Process explicit discoveries
@@ -70,9 +94,6 @@ public class TemplateBuilder
         {
             allDiscoveryRules.Add(reflector.ReflectDiscovery(valueType, collection, macroName));
         }
-
-        // Build triggers
-        var triggers = new List<Trigger>();
         if (!_nodataDisabled)
         {
             var masterKey = $"{_prefix}.data";
@@ -116,7 +137,8 @@ public class TemplateBuilder
         Type type,
         string section,
         List<DependentItem> dependentItems,
-        List<DiscoveryRule> discoveryRules)
+        List<DiscoveryRule> discoveryRules,
+        List<Trigger> triggers)
     {
         bool hasLeafProperties = false;
 
@@ -127,7 +149,6 @@ public class TemplateBuilder
 
             if (IsDictionaryType(prop.PropertyType, out var valueType))
             {
-                // Auto-discover dictionary properties
                 var discoveryAttr = prop.GetCustomAttribute<DiscoveryAttribute>();
                 var macroName = discoveryAttr?.MacroName;
                 var collection = prop.Name.ToLowerInvariant();
@@ -141,8 +162,9 @@ public class TemplateBuilder
 
         if (hasLeafProperties)
         {
-            // ReflectItems now skips non-leaf properties, so it's safe to call for the whole type
             dependentItems.AddRange(reflector.ReflectItems(type, section));
+            triggers.AddRange(reflector.ReflectTriggers(type, section));
+            _sectionTypes[section] = type;
         }
     }
 
@@ -163,7 +185,7 @@ public class TemplateBuilder
             var items = group.ToList();
 
             // Find the type that produced this component
-            var sourceType = _types.FirstOrDefault(t => DeriveSection(t) == component);
+            _sectionTypes.TryGetValue(component, out var sourceType);
 
             // Determine numeric items (not Char)
             var numericItems = items

@@ -2,8 +2,8 @@ namespace ZabbixSender.Template;
 
 public enum Priority
 {
-    NotClassified,
-    Information,
+    Not_Classified,
+    Info,
     Warning,
     Average,
     High,

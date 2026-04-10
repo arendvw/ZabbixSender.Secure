@@ -103,11 +103,11 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             {
                 var keyRef = $"/{templateName}/{protoKey}";
                 var expression = changeAttr.Duration != null
-                    ? $"change({keyRef})<>0 or diff({keyRef})=1"
-                    : $"change({keyRef})<>0 or diff({keyRef})=1";
+                    ? $"change({keyRef})<>0"
+                    : $"change({keyRef})<>0";
                 var recovery = changeAttr.Duration != null
                     ? $"nodata({keyRef},{changeAttr.Duration})=0 and change({keyRef})=0"
-                    : $"change({keyRef})=0 and diff({keyRef})=0";
+                    : $"change({keyRef})=0";
 
                 triggerPrototypes.Add(new TriggerPrototype
                 {
@@ -153,6 +153,61 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
         if (underlying == typeof(string))
             return ZabbixValueType.Char;
         return ZabbixValueType.Unsigned;
+    }
+
+    public List<Trigger> ReflectTriggers(Type type, string section)
+    {
+        var triggers = new List<Trigger>();
+
+        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetCustomAttribute<ZabbixIgnoreAttribute>() != null)
+                continue;
+            if (!IsLeafType(prop.PropertyType))
+                continue;
+
+            var keyOverride = prop.GetCustomAttribute<ItemKeyAttribute>();
+            var key = keyOverride?.Key ?? $"{prefix}.{section}.{prop.Name.ToLowerInvariant()}";
+            var valueType = MapValueType(prop.PropertyType);
+
+            foreach (var triggerAttr in prop.GetCustomAttributes<TriggerAttribute>())
+            {
+                var expression = BuildTriggerExpression(triggerAttr, templateName, key, valueType);
+                var recovery = BuildRecoveryExpression(triggerAttr, templateName, key, valueType);
+                var triggerLabel = triggerAttr.Value ?? $"{triggerAttr.Operator}{triggerAttr.Threshold}";
+
+                triggers.Add(new Trigger
+                {
+                    Uuid = UuidGenerator.Generate(templateName, $"{key}.trigger.{triggerLabel}"),
+                    Expression = expression,
+                    RecoveryExpression = recovery,
+                    Name = $"{DisplayName}: {FormatSection(section)} {prop.Name.ToLowerInvariant()} is {{ITEM.LASTVALUE1}}",
+                    Priority = triggerAttr.Priority.ToString().ToUpperInvariant(),
+                    Tags = [("scope", "availability")]
+                });
+            }
+
+            foreach (var changeAttr in prop.GetCustomAttributes<TriggerOnChangeAttribute>())
+            {
+                var keyRef = $"/{templateName}/{key}";
+                var expression = $"change({keyRef})<>0";
+                var recovery = changeAttr.Duration != null
+                    ? $"nodata({keyRef},{changeAttr.Duration})=0 and change({keyRef})=0"
+                    : $"change({keyRef})=0";
+
+                triggers.Add(new Trigger
+                {
+                    Uuid = UuidGenerator.Generate(templateName, $"{key}.trigger.change"),
+                    Expression = expression,
+                    RecoveryExpression = recovery,
+                    Name = $"{DisplayName}: {FormatSection(section)} {prop.Name.ToLowerInvariant()} changed",
+                    Priority = changeAttr.Priority.ToString().ToUpperInvariant(),
+                    Tags = [("scope", "notice")]
+                });
+            }
+        }
+
+        return triggers;
     }
 
     public static string ToCamelCase(string name)

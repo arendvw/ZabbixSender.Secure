@@ -17,7 +17,7 @@ public class TypeReflectorTests
         result.Count.ShouldBe(3);
         result[0].Key.ShouldBe("sampleapp.memory.app");
         result[0].JsonPath.ShouldBe("$.memory.app");
-        result[0].Units.ShouldBe("MB");
+        result[0].Units.ShouldBe("B");
         result[0].Component.ShouldBe("memory");
         result[0].ValueType.ShouldBe(ZabbixValueType.Unsigned);
     }
@@ -214,12 +214,12 @@ public class TypeReflectorTests
         rule.TriggerPrototypes[0].Expression.ShouldContain("change(");
         rule.TriggerPrototypes[0].RecoveryExpression.ShouldNotBeNull();
         rule.TriggerPrototypes[0].Name.ShouldContain("changed");
-        rule.TriggerPrototypes[0].Priority.ShouldBe("INFORMATION");
+        rule.TriggerPrototypes[0].Priority.ShouldBe("INFO");
     }
 
     private class ChangeFixture
     {
-        [TriggerOnChange(Priority.Information, Duration = "5m")]
+        [TriggerOnChange(Priority.Info, Duration = "5m")]
         public string Version { get; set; } = "";
     }
 }
