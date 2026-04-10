@@ -34,7 +34,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             items.Add(new DependentItem
             {
                 Uuid = UuidGenerator.Generate(templateName, key),
-                Name = $"{DisplayName}: {FormatSection(section)} - {FormatPropertyName(prop.Name)}",
+                Name = $"{FormatPropertyName(prop.Name)} ({FormatSection(section)})",
                 Key = key,
                 JsonPath = jsonPath,
                 MasterItemKey = $"{prefix}.data",
@@ -72,7 +72,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
             prototypes.Add(new ItemPrototype
             {
                 Uuid = UuidGenerator.Generate(templateName, protoKey),
-                Name = $"{DisplayName}: {FormatSection(collection)} - {macroRef} {prop.Name.ToLowerInvariant()}",
+                Name = $"{FormatSection(collection)}: {macroRef} {prop.Name.ToLowerInvariant()}",
                 Key = protoKey,
                 JsonPath = jsonPath,
                 MasterItemKey = $"{prefix}.data",
@@ -93,7 +93,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
                     Uuid = UuidGenerator.Generate(templateName, $"{protoKey}.trigger.{triggerLabel}"),
                     Expression = expression,
                     RecoveryExpression = recovery,
-                    Name = $"{DisplayName}: {FormatSection(collection)} {macroRef} {prop.Name.ToLowerInvariant()} is {{ITEM.LASTVALUE1}}",
+                    Name = $"{FormatSection(collection)}: {macroRef} {prop.Name.ToLowerInvariant()} is {{ITEM.LASTVALUE1}}",
                     Priority = triggerAttr.Priority.ToString().ToUpperInvariant(),
                     Tags = [("scope", "availability")]
                 });
@@ -114,7 +114,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
                     Uuid = UuidGenerator.Generate(templateName, $"{protoKey}.trigger.change.{changeAttr.Priority}"),
                     Expression = expression,
                     RecoveryExpression = recovery,
-                    Name = $"{DisplayName}: {FormatSection(collection)} {macroRef} {prop.Name.ToLowerInvariant()} changed",
+                    Name = $"{FormatSection(collection)}: {macroRef} {prop.Name.ToLowerInvariant()} changed",
                     Priority = changeAttr.Priority.ToString().ToUpperInvariant(),
                     Tags = [("scope", "notice")]
                 });
@@ -133,7 +133,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
         return new DiscoveryRule
         {
             Uuid = UuidGenerator.Generate(templateName, discoveryKey),
-            Name = $"{DisplayName}: {FormatSection(collection)} discovery",
+            Name = $"{FormatSection(collection)}: Discovery",
             Key = discoveryKey,
             MasterItemKey = $"{prefix}.data",
             MacroName = macroRef,
@@ -189,7 +189,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
                     Uuid = UuidGenerator.Generate(templateName, $"{key}.trigger.{triggerLabel}"),
                     Expression = expression,
                     RecoveryExpression = recovery,
-                    Name = $"{DisplayName}: {FormatSection(section)} {prop.Name.ToLowerInvariant()} is {{ITEM.LASTVALUE1}}",
+                    Name = $"{FormatSection(section)}: {prop.Name.ToLowerInvariant()} is {{ITEM.LASTVALUE1}}",
                     Priority = triggerAttr.Priority.ToString().ToUpperInvariant(),
                     Tags = [("scope", "availability")]
                 });
@@ -208,7 +208,7 @@ public class TypeReflector(string prefix, string templateName, string? displayNa
                     Uuid = UuidGenerator.Generate(templateName, $"{key}.trigger.change.{changeAttr.Priority}"),
                     Expression = expression,
                     RecoveryExpression = recovery,
-                    Name = $"{DisplayName}: {FormatSection(section)} {prop.Name.ToLowerInvariant()} changed",
+                    Name = $"{FormatSection(section)}: {prop.Name.ToLowerInvariant()} changed",
                     Priority = changeAttr.Priority.ToString().ToUpperInvariant(),
                     Tags = [("scope", "notice")]
                 });

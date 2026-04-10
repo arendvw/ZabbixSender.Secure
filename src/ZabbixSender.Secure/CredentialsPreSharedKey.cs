@@ -32,6 +32,10 @@ public class CredentialsPreSharedKey : IZabbixSslCredentials
     public string Identity { get; }
     public byte[] Key { get; }
 
+    public static bool IsValidHexKey(string hex) =>
+        hex != null && hex.Length > 0 && hex.Length % 2 == 0 &&
+        hex.AsSpan().IndexOfAnyExcept("0123456789abcdefABCDEF") == -1;
+
     private static byte[] ParseHex(string hex)
     {
         if (hex == null) throw new ArgumentNullException(nameof(hex));
